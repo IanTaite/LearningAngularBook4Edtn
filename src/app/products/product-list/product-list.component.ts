@@ -1,4 +1,5 @@
-import { AfterViewInit, Component, ViewChild, OnInit } from '@angular/core';
+import { Component, ViewChild, OnInit } from '@angular/core';
+import { Observable } from 'rxjs';
 import { ProductDetailComponent } from '../product-detail/product-detail.component';
 import { Product } from '../product';
 import { ProductsService } from '../products.service';
@@ -8,28 +9,26 @@ import { ProductsService } from '../products.service';
   templateUrl: './product-list.component.html',
   styleUrls: ['./product-list.component.css'],
 })
-export class ProductListComponent implements AfterViewInit, OnInit {
-  @ViewChild(ProductDetailComponent) productDetail:
-    | ProductDetailComponent
-    | undefined;
-
-  products: Product[] = [];
-
+export class ProductListComponent implements OnInit {
   selectedProduct: Product | undefined;
-
-  constructor(private productService: ProductsService) {
-  }
+  products: Product[] = [];
+  constructor(private productService: ProductsService) {}
   ngOnInit(): void {
-    this.products = this.productService.getProducts();
+    this.getProducts();
   }
-
-  onBuy(product: Product) {
+  onBuy() {
     window.alert(`You just bought ${this.selectedProduct?.name}!`);
   }
-
-  ngAfterViewInit(): void {
-    if (this.productDetail) {
-      console.log('AfterViewInit product-list', this.productDetail.product);
-    }
+  onAdd(product: Product) {
+    this.products.push(product);
+  }
+  onDelete() {
+    this.products = this.products.filter(product => product !== this.selectedProduct);
+    this.selectedProduct = undefined;
+  }
+  private getProducts() {
+    this.productService.getProducts().subscribe((products) => {
+      this.products = products;
+    });
   }
 }

@@ -5,8 +5,10 @@ import {
   EventEmitter,
   OnChanges,
   SimpleChanges,
-  AfterViewInit,
 } from '@angular/core';
+
+import { Observable } from 'rxjs';
+import { ProductsService } from '../products.service';
 
 import { Product } from '../product';
 
@@ -15,32 +17,32 @@ import { Product } from '../product';
   templateUrl: './product-detail.component.html',
   styleUrls: ['./product-detail.component.css'],
 })
-export class ProductDetailComponent implements OnChanges, AfterViewInit {
-  @Input() product: Product | undefined;
-  @Output() bought = new EventEmitter<Product>();
+export class ProductDetailComponent implements OnChanges {
+  @Input() id = -1;
+  @Output() bought = new EventEmitter();
+  @Output() deleted = new EventEmitter();
 
-  constructor() {
-    console.log(`Name is ${this.product?.name} in the constructor`);
-  }
+  product$: Observable<Product> | undefined;
+
+  constructor(private productService: ProductsService) {}
 
   ngOnChanges(changes: SimpleChanges): void {
-    const product = changes['product'];
-    if (!product.isFirstChange()) {
-      const oldValue = product.previousValue.name;
-      const newValue = product.currentValue.name;
-      console.log('Product changed from ${oldValue} to ${newValue}');
-    }
-  }
-
-  ngOnInit() {
-    console.log(`Name is ${this.product?.name} in ngOnInit`);
-  }
-
-  ngAfterViewInit(): void {
-    console.log('AfterViewInit product-detail');
+    this.product$ = this.productService.getProduct(this.id);
   }
 
   buy() {
-    this.bought.emit(this.product);
+    this.bought.emit();
+  }
+
+  changePrice(product: Product, price: number) {
+    this.productService.updateProduct(product.id, price).subscribe(() => {
+      alert(`The price of ${product.name} was changed!`);
+    });
+  }
+
+  remove(product: Product) {
+    this.productService.deleteProduct(product.id).subscribe(() => {
+      this.deleted.emit();
+    });
   }
 }
