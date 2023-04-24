@@ -8,6 +8,7 @@ import {
 } from '@angular/core';
 
 import { Observable } from 'rxjs';
+import { AuthService } from '../../auth/auth.service';
 import { ProductsService } from '../products.service';
 
 import { Product } from '../product';
@@ -24,7 +25,10 @@ export class ProductDetailComponent implements OnChanges {
 
   product$: Observable<Product> | undefined;
 
-  constructor(private productService: ProductsService) {}
+  constructor(
+    private productService: ProductsService,
+    public authService: AuthService
+  ) {}
 
   ngOnChanges(changes: SimpleChanges): void {
     this.product$ = this.productService.getProduct(this.id);
